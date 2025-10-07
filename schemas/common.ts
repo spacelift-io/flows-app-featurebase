@@ -51,19 +51,6 @@ export const postCategorySchema = featurebasePostCategorySchema as any;
 export const postStatusSchema = featurebasePostStatusSchema as any;
 
 /**
- * Post tag object schema
- */
-export const postTagSchema = {
-  type: "object" as const,
-  properties: {
-    name: { type: "string" as const },
-    color: { type: "string" as const },
-    private: { type: "boolean" as const },
-    id: { type: "string" as const },
-  },
-};
-
-/**
  * Complete post object schema (from comprehensive webhook schemas)
  * This provides the accurate, canonical representation of post objects
  */

@@ -103,6 +103,19 @@ export const featurebasePostCategorySchema = {
   required: ["name", "private", "id"],
 } as const;
 
+/**
+ * Post tag object schema
+ */
+export const postTagSchema = {
+  type: "object" as const,
+  properties: {
+    name: { type: "string" as const },
+    color: { type: "string" as const },
+    private: { type: "boolean" as const },
+    id: { type: "string" as const },
+  },
+};
+
 export const featurebasePostSchema = {
   type: "object",
   description: "Complete post object with all associated data.",
@@ -150,8 +163,13 @@ export const featurebasePostSchema = {
       type: ["string", "null"],
     },
     user: featurebaseUserSchema,
-    status: featurebasePostStatusSchema,
-    category: featurebasePostCategorySchema,
+    postStatus: featurebasePostStatusSchema,
+    postCategory: featurebasePostCategorySchema,
+    postTags: {
+      type: "array",
+      items: postTagSchema,
+      description: "List of tags associated with the post.",
+    },
   },
   required: [
     "id",
