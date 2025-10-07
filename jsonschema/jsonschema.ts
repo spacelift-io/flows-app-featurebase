@@ -183,8 +183,8 @@ export const featurebasePostSchema = {
     "date",
     "lastModified",
     "user",
-    "status",
-    "category",
+    "postStatus",
+    "postCategory",
   ],
 } as const;
 
