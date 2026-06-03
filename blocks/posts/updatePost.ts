@@ -87,6 +87,13 @@ export const updatePostBlock: AppBlock = {
           },
           required: false,
         },
+        assigneeId: {
+          name: "Assignee ID",
+          description:
+            "Featurebase admin ID to assign this post to (null to unassign)",
+          type: "string",
+          required: false,
+        },
       },
       onEvent: async (input) => {
         const params: FeaturebaseUpdatePostParams = {
@@ -101,6 +108,7 @@ export const updatePostBlock: AppBlock = {
           inReview: input.event.inputConfig.inReview,
           date: input.event.inputConfig.date,
           customInputValues: input.event.inputConfig.customInputValues,
+          assigneeId: input.event.inputConfig.assigneeId,
         };
 
         const response = await updatePost(
