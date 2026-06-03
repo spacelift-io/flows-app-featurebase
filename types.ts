@@ -203,6 +203,7 @@ export interface FeaturebaseUpdatePostParams {
   inReview?: boolean;
   date?: string;
   customInputValues?: Record<string, any>;
+  assigneeId?: string;
 }
 
 export interface FeaturebaseDeletePostParams {
