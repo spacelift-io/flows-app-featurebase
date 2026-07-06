@@ -87,13 +87,13 @@ const createWebhookValidator = (
       (payload as any).data === null ||
       !("item" in (payload as any).data) ||
       typeof (payload as any).data.item !== "object" ||
-      (payload as any).data.item === null ||
-      !("type" in (payload as any).data.item) ||
-      (payload as any).data.item.type !== expectedItemType
+      (payload as any).data.item === null
     ) {
       return false;
     }
-    return true;
+    // Nova-format payloads (2026) identify the item via `object`; legacy payloads via `type`
+    const item = (payload as any).data.item;
+    return (item.object ?? item.type) === expectedItemType;
   };
 };
 

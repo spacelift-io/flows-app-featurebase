@@ -132,8 +132,12 @@ export async function makeFeaturebaseRequest(
     }
 
     if (!response.ok) {
+      const detail =
+        typeof responseData === "string"
+          ? responseData.slice(0, 300)
+          : JSON.stringify(responseData ?? "").slice(0, 300);
       throw new FeaturebaseApiError(
-        `Featurebase API error: ${response.status} ${response.statusText}`,
+        `Featurebase API error: ${response.status} ${response.statusText}${detail ? ` — ${detail}` : ""}`,
         response.status,
         responseData,
       );
@@ -164,10 +168,15 @@ export async function getPost(
   config: FeaturebaseApiConfig,
   params: { id: string },
 ) {
-  return makeFeaturebaseRequest(config, "/v2/posts", {
-    method: "GET",
-    queryParams: { id: params.id },
-  });
+  // Nova API (2026): retrieve-by-id is a path parameter; the old
+  // `GET /v2/posts?id=...` form is rejected with 400 Bad Request.
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/posts/${encodeURIComponent(params.id)}`,
+    {
+      method: "GET",
+    },
+  );
 }
 
 export async function createPost(
