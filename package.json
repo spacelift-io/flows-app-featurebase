@@ -1,12 +1,12 @@
 {
   "type": "module",
   "dependencies": {
-    "@slflows/sdk": "^0.0.7",
+    "@slflows/sdk": "^0.14.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.7",
-    "@useflows/flowctl": "^0.1.1",
+    "@useflows/flowctl": "^0.4.0",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2"
   },

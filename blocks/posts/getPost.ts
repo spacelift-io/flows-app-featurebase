@@ -26,7 +26,10 @@ export const getPostBlock: AppBlock = {
         } catch (error) {
           // Nova returns 404 for a nonexistent post id; preserve the block's
           // historical "not found is not an error" contract.
-          if (error instanceof FeaturebaseApiError && error.statusCode === 404) {
+          if (
+            error instanceof FeaturebaseApiError &&
+            error.statusCode === 404
+          ) {
             await events.emit({ post: null, success: true, found: false });
             return;
           }
