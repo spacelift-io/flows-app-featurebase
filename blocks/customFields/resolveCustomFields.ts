@@ -28,16 +28,24 @@ export const resolveCustomFieldsBlock: AppBlock = {
       onEvent: async (input: EventInput) => {
         const { customInputValues } = input.event.inputConfig;
 
-        // Get all custom fields to resolve against
+        // Get all custom fields to resolve against. Nova (2026) returns a
+        // list object `{ object: "list", data: [...] }`; the legacy API
+        // returned `{ success, results }`. Support both.
         const customFieldsResult = (await listCustomFields(
           createApiConfig(input.app.config),
-        )) as { success: boolean; results: any[]; error?: string };
+        )) as {
+          success?: boolean;
+          results?: any[];
+          data?: any[];
+        };
 
-        if (!customFieldsResult.success) {
+        const customFields =
+          customFieldsResult.data ?? customFieldsResult.results;
+
+        if (!Array.isArray(customFields)) {
           throw new Error("Failed to fetch custom fields");
         }
 
-        const customFields = customFieldsResult.results;
         const resolvedFields = [];
 
         // Process each custom input value
@@ -54,7 +62,10 @@ export const resolveCustomFieldsBlock: AppBlock = {
             continue;
           }
 
-          const field = customFields.find((f: any) => f._id === fieldId);
+          // Nova uses `id`; the legacy API used `_id`
+          const field = customFields.find(
+            (f: any) => (f.id ?? f._id) === fieldId,
+          );
 
           if (!field) {
             resolvedFields.push({
@@ -70,7 +81,7 @@ export const resolveCustomFieldsBlock: AppBlock = {
           if (field.options && field.options.length > 0) {
             const resolveOption = (optionId: string) => {
               const option = field.options.find(
-                (opt: any) => opt._id === optionId,
+                (opt: any) => (opt.id ?? opt._id) === optionId,
               );
               return option ? option.label : optionId;
             };
