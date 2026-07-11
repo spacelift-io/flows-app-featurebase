@@ -193,20 +193,49 @@ export async function updatePost(
   config: FeaturebaseApiConfig,
   params: FeaturebaseUpdatePostParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/posts", {
-    method: "PATCH",
-    body: params,
-  });
+  // Nova API (2026): update is PATCH /v2/posts/{id}; sending `id` in the
+  // body is rejected ("Unrecognized key(s) in object: 'id'"). Several body
+  // fields were also renamed; map the legacy names so existing block
+  // configs keep working.
+  const {
+    id,
+    status,
+    category,
+    commentsAllowed,
+    date,
+    customInputValues,
+    ...rest
+  } = params;
+  const body: Record<string, any> = { ...rest };
+  if (status !== undefined) body.statusId = status;
+  if (category !== undefined) body.boardId = category;
+  if (commentsAllowed !== undefined) body.commentsEnabled = commentsAllowed;
+  if (date !== undefined) body.createdAt = date;
+  if (customInputValues !== undefined) body.customFields = customInputValues;
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/posts/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body,
+      contentType: "json",
+    },
+  );
 }
 
 export async function deletePost(
   config: FeaturebaseApiConfig,
   params: FeaturebaseDeletePostParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/posts", {
-    method: "DELETE",
-    body: params,
-  });
+  // Nova API (2026): delete is DELETE /v2/posts/{id} (id was in the body
+  // on the legacy API).
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/posts/${encodeURIComponent(params.id)}`,
+    {
+      method: "DELETE",
+    },
+  );
 }
 
 export async function getPostUpvoters(
