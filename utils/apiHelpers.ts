@@ -212,15 +212,11 @@ export async function updatePost(
   if (commentsAllowed !== undefined) body.commentsEnabled = commentsAllowed;
   if (date !== undefined) body.createdAt = date;
   if (customInputValues !== undefined) body.customFields = customInputValues;
-  return makeFeaturebaseRequest(
-    config,
-    `/v2/posts/${encodeURIComponent(id)}`,
-    {
-      method: "PATCH",
-      body,
-      contentType: "json",
-    },
-  );
+  return makeFeaturebaseRequest(config, `/v2/posts/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body,
+    contentType: "json",
+  });
 }
 
 export async function deletePost(
