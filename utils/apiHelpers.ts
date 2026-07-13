@@ -37,6 +37,15 @@ export interface FeaturebaseApiConfig {
 
 const DEFAULT_BASE_URL = "https://do.featurebase.app";
 
+// This app makes queries against the Nova shapes of the API, so it pins the
+// client to a Nova version. When the API version is unspecified, the org's
+// dashboard-configured API version is used. If this version is a legacy one,
+// some of the blocks will produce errors.
+// Bump this deliberately alongside the matching code changes when migrating to
+// a newer API version.
+// See https://docs.featurebase.app/rest-api (versioning).
+const FEATUREBASE_API_VERSION = "2026-01-01.nova";
+
 export class FeaturebaseApiError extends Error {
   constructor(
     message: string,
@@ -82,6 +91,7 @@ export async function makeFeaturebaseRequest(
 
   const headers: Record<string, string> = {
     "X-API-Key": config.apiKey,
+    "Featurebase-Version": FEATUREBASE_API_VERSION,
   };
 
   let requestBody: string | undefined;
