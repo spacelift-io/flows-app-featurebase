@@ -81,7 +81,8 @@ import {
 } from "../types.ts";
 
 /**
- * Builds post event payload from Featurebase post data
+ * Builds post event payload from a webhook post item (legacy or Nova shape),
+ * emitting the legacy structure that downstream flows consume.
  */
 export function buildPostEventPayload(item: FeaturebasePost) {
   return {
@@ -92,14 +93,16 @@ export function buildPostEventPayload(item: FeaturebasePost) {
       slug: item.slug,
       upvotes: item.upvotes,
       commentCount: item.commentCount,
-      pinned: item.pinned,
-      commentsAllowed: item.commentsAllowed,
-      date: item.date,
-      lastModified: item.lastModified,
+      pinned: item.pinned ?? item.isPinned,
+      commentsAllowed: item.commentsAllowed ?? item.commentsEnabled,
+      date: item.date ?? item.createdAt,
+      lastModified: item.lastModified ?? item.updatedAt,
       lastUpvoted: item.lastUpvoted,
-      user: mapFeaturebaseUser(item.user),
-      status: mapFeaturebasePostStatus(item.postStatus),
-      category: mapFeaturebasePostCategory(item.postCategory),
+      user: mapFeaturebaseUser(item.user ?? item.author),
+      status: mapFeaturebasePostStatus(
+        item.postStatus ?? item.status ?? item.statusId,
+      ),
+      category: mapFeaturebasePostCategory(item.postCategory ?? item.boardId),
     },
   };
 }
@@ -130,15 +133,15 @@ export function buildCommentEventPayload(item: FeaturebaseComment) {
       upvotes: item.upvotes,
       downvotes: item.downvotes,
       inReview: item.inReview,
-      pinned: item.pinned,
+      pinned: item.pinned ?? item.isPinned,
       emailSent: item.emailSent,
       sendNotification: item.sendNotification,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       organization: item.organization,
-      postId: item.submission,
+      postId: item.submission ?? item.postId,
       path: item.path,
-      user: mapFeaturebaseUser(item.user),
+      user: mapFeaturebaseUser(item.user ?? item.author),
     },
   };
 }
@@ -178,7 +181,9 @@ export function buildChangelogEventPayload(item: FeaturebaseChangelog) {
       publishedLocales: item.publishedLocales,
       slugs: item.slugs,
       organization: item.organization,
-      categories: mapFeaturebaseChangelogCategories(item.changelogCategories),
+      categories: mapFeaturebaseChangelogCategories(
+        item.changelogCategories ?? [],
+      ),
     },
   };
 }
@@ -190,8 +195,8 @@ export function buildVoteEventPayload(item: FeaturebasePostVote) {
   return {
     vote: {
       action: item.action,
-      postId: item.submissionId,
-      user: mapFeaturebaseUser(item.user),
+      postId: item.submissionId ?? item.postId,
+      user: mapFeaturebaseUser(item.user ?? item.author),
     },
   };
 }

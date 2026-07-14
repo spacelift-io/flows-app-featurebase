@@ -35,61 +35,81 @@ export interface FeaturebasePostCategory {
   icon: {
     type: string;
     value: string;
-  };
+  } | null;
   id: string;
 }
 
+// Webhook items arrive in the legacy (clover) shape or the Nova
+// (2026-01-01.nova) shape, which renamed several fields. Each renamed field
+// appears below as a legacy/Nova optional pair; the payload builders in
+// schemas/common.ts normalize whichever variant is present.
 export interface FeaturebasePost {
   id: string;
-  type: "post";
+  type?: "post"; // legacy
+  object?: "post"; // Nova
   title: string;
   content: string;
-  user: FeaturebaseUser;
-  postStatus: FeaturebasePostStatus;
-  postCategory: FeaturebasePostCategory;
-  date: string;
+  user?: FeaturebaseUser; // legacy
+  author?: FeaturebaseUser; // Nova
+  postStatus?: FeaturebasePostStatus; // legacy
+  status?: FeaturebasePostStatus; // Nova
+  statusId?: string; // Nova
+  postCategory?: FeaturebasePostCategory; // legacy
+  boardId?: string; // Nova
+  date?: string; // legacy
+  createdAt?: string; // Nova
   slug: string;
   upvotes: number;
-  inReview: boolean;
-  accessUsers: string[];
-  accessCompanies: string[];
-  clickupTasks: unknown[];
-  githubIssues: unknown[];
-  commentsAllowed: boolean;
-  categoryId: string;
-  lastModified: string;
-  lastUpvoted: string;
-  commentCount: number;
-  postTags: unknown[];
-  pinned: boolean;
-  devopsWorkItems: unknown[];
+  inReview?: boolean;
+  accessUsers?: string[];
+  accessCompanies?: string[];
+  clickupTasks?: unknown[];
+  githubIssues?: unknown[];
+  commentsAllowed?: boolean; // legacy
+  commentsEnabled?: boolean; // Nova
+  categoryId?: string;
+  lastModified?: string; // legacy
+  updatedAt?: string; // Nova
+  lastUpvoted?: string;
+  commentCount?: number;
+  postTags?: unknown[];
+  pinned?: boolean; // legacy
+  isPinned?: boolean; // Nova
+  devopsWorkItems?: unknown[];
 }
 
 export interface FeaturebasePostVote {
-  type: "post_vote";
+  type?: "post_vote"; // legacy
+  object?: "post_vote"; // Nova
   action: "add" | "remove";
-  submissionId: string;
-  user: FeaturebaseUser;
+  submissionId?: string; // legacy
+  postId?: string; // Nova
+  user?: FeaturebaseUser; // legacy
+  author?: FeaturebaseUser; // Nova
 }
 
 export interface FeaturebaseComment {
-  type: "comment";
+  type?: "comment"; // legacy
+  object?: "comment"; // Nova
   id: string;
   content: string;
-  user: FeaturebaseUser;
+  user?: FeaturebaseUser; // legacy
+  author?: FeaturebaseUser; // Nova
   isPrivate: boolean;
-  score: number;
+  score?: number;
   upvotes: number;
-  downvotes: number;
-  inReview: boolean;
-  pinned: boolean;
-  emailSent: boolean;
-  sendNotification: boolean;
+  downvotes?: number;
+  inReview?: boolean;
+  pinned?: boolean; // legacy
+  isPinned?: boolean; // Nova
+  emailSent?: boolean;
+  sendNotification?: boolean;
   createdAt: string;
-  updatedAt: string;
-  organization: string;
-  submission: string;
-  path: string;
+  updatedAt?: string;
+  organization?: string;
+  submission?: string; // legacy
+  postId?: string; // Nova
+  path?: string;
 }
 
 export interface FeaturebaseChangelogCategory {
