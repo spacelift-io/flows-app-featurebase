@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { getSurvey } from "../../utils/apiHelpers.ts";
 import { buildGetSurveyOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const getSurveyBlock: AppBlock = {
   name: "Get survey by ID",
@@ -30,7 +31,7 @@ export const getSurveyBlock: AppBlock = {
 
         const result = await getSurvey(apiConfig, { id });
 
-        await events.emit(result);
+        await events.emit(unwrapItem(result));
       },
     },
   },

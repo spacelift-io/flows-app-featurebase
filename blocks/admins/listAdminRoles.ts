@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { listAdminRoles } from "../../utils/apiHelpers.ts";
 import { buildListAdminRolesOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapList } from "../../utils/responseHelpers.ts";
 
 export const listAdminRolesBlock: AppBlock = {
   name: "List admin roles",
@@ -17,7 +18,10 @@ export const listAdminRolesBlock: AppBlock = {
       onEvent: async (input) => {
         const result = await listAdminRoles(createApiConfig(input.app.config));
 
-        await events.emit(result);
+        await events.emit({
+          success: true,
+          results: unwrapList(result),
+        });
       },
     },
   },

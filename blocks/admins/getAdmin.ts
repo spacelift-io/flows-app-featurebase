@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { getAdmin } from "../../utils/apiHelpers.ts";
 import { buildGetAdminOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const getAdminBlock: AppBlock = {
   name: "Get admin by ID",
@@ -30,7 +31,7 @@ export const getAdminBlock: AppBlock = {
           id,
         });
 
-        await events.emit(result);
+        await events.emit(unwrapItem(result));
       },
     },
   },

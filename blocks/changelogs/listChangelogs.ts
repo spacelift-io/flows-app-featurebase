@@ -3,6 +3,10 @@ import { listChangelogs } from "../../utils/apiHelpers.ts";
 import { FeaturebaseListChangelogsParams } from "../../types.ts";
 import { buildListChangelogsOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import {
+  unwrapList,
+  normalizePagination,
+} from "../../utils/responseHelpers.ts";
 
 export const listChangelogsBlock: AppBlock = {
   name: "List Changelogs",
@@ -74,13 +78,8 @@ export const listChangelogsBlock: AppBlock = {
         );
 
         await events.emit({
-          changelogs: (response as any)?.results || [],
-          pagination: {
-            page: (response as any)?.page || 1,
-            limit: (response as any)?.limit || 10,
-            totalPages: (response as any)?.totalPages || 1,
-            totalResults: (response as any)?.totalResults || 0,
-          },
+          changelogs: unwrapList(response),
+          pagination: normalizePagination(response),
           success: true,
         });
       },

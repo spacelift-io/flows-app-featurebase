@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { getCustomField } from "../../utils/apiHelpers.ts";
 import { buildGetCustomFieldOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const getCustomFieldBlock: AppBlock = {
   name: "Get custom field by ID",
@@ -30,7 +31,7 @@ export const getCustomFieldBlock: AppBlock = {
           id,
         });
 
-        await events.emit(result);
+        await events.emit(unwrapItem(result));
       },
     },
   },

@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { listBoards } from "../../utils/apiHelpers.ts";
 import { buildListBoardsOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapList } from "../../utils/responseHelpers.ts";
 
 export const listBoardsBlock: AppBlock = {
   name: "List boards",
@@ -17,7 +18,10 @@ export const listBoardsBlock: AppBlock = {
       onEvent: async (input) => {
         const result = await listBoards(createApiConfig(input.app.config));
 
-        await events.emit(result);
+        await events.emit({
+          success: true,
+          results: unwrapList(result),
+        });
       },
     },
   },

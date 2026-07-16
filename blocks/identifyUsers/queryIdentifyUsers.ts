@@ -2,6 +2,10 @@ import { AppBlock, events, EventInput } from "@slflows/sdk/v1";
 import { queryIdentifyUsers } from "../../utils/apiHelpers.ts";
 import { buildQueryIdentifyUsersOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import {
+  unwrapList,
+  normalizePagination,
+} from "../../utils/responseHelpers.ts";
 
 export const queryIdentifyUsersBlock: AppBlock = {
   name: "Query identified users",
@@ -80,7 +84,14 @@ export const queryIdentifyUsersBlock: AppBlock = {
 
         const result = await queryIdentifyUsers(apiConfig, params as any);
 
-        await events.emit(result);
+        const pagination = normalizePagination(result);
+        await events.emit({
+          success: true,
+          results: unwrapList(result),
+          page: pagination.page,
+          limit: pagination.limit,
+          totalResults: pagination.totalResults,
+        });
       },
     } as any,
   } as any,

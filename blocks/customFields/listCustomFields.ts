@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { listCustomFields } from "../../utils/apiHelpers.ts";
 import { buildListCustomFieldsOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapList } from "../../utils/responseHelpers.ts";
 
 export const listCustomFieldsBlock: AppBlock = {
   name: "List custom fields",
@@ -19,7 +20,10 @@ export const listCustomFieldsBlock: AppBlock = {
           createApiConfig(input.app.config),
         );
 
-        await events.emit(result);
+        await events.emit({
+          success: true,
+          results: unwrapList(result),
+        });
       },
     },
   },
