@@ -77,9 +77,10 @@ export const listChangelogsBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
           changelogs: unwrapList(response),
-          pagination: normalizePagination(response),
+          ...(pagination && { pagination }),
           success: true,
         });
       },

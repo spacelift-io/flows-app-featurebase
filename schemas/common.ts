@@ -16,7 +16,8 @@ import {
  */
 export const paginationSchema = {
   type: "object" as const,
-  description: "Pagination information",
+  description:
+    "Pagination information. Only present when the API returns pagination metadata; individual fields are omitted when not provided.",
   properties: {
     page: { type: "number" as const, description: "Current page number" },
     limit: { type: "number" as const, description: "Items per page" },
@@ -29,7 +30,7 @@ export const paginationSchema = {
       description: "Total number of results",
     },
   },
-  required: ["page", "limit", "totalPages", "totalResults"],
+  required: [],
 };
 
 /**
@@ -215,7 +216,7 @@ export const buildListPostsOutput = () => ({
     pagination: paginationSchema,
     success: successField,
   },
-  required: ["posts", "pagination", "success"],
+  required: ["posts", "success"],
 });
 
 export const buildCreatePostOutput = () => ({
@@ -262,7 +263,7 @@ export const buildListCommentsOutput = () => ({
     },
     success: successField,
   },
-  required: ["comments", "pagination", "filters", "success"],
+  required: ["comments", "filters", "success"],
 });
 
 export const buildCreateCommentOutput = () => ({
@@ -441,7 +442,7 @@ export const buildListChangelogsOutput = () => ({
     pagination: paginationSchema,
     success: successField,
   },
-  required: ["changelogs", "pagination", "success"],
+  required: ["changelogs", "success"],
 });
 
 export const buildGetChangelogOutput = () => ({
@@ -1589,7 +1590,7 @@ export const buildQueryIdentifyUsersOutput = () => ({
       description: "Total number of users",
     },
   },
-  required: ["success", "results", "page", "limit", "totalResults"],
+  required: ["success", "results"],
 });
 
 export const buildIdentifyUserOutput = () => ({

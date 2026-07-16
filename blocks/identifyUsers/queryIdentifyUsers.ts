@@ -88,9 +88,7 @@ export const queryIdentifyUsersBlock: AppBlock = {
         await events.emit({
           success: true,
           results: unwrapList(result),
-          page: pagination.page,
-          limit: pagination.limit,
-          totalResults: pagination.totalResults,
+          ...pagination,
         });
       },
     } as any,

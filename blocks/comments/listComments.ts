@@ -95,9 +95,10 @@ export const listCommentsBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
           comments: unwrapList(response),
-          pagination: normalizePagination(response),
+          ...(pagination && { pagination }),
           filters: {
             submissionId: params.submissionId,
             changelogId: params.changelogId,

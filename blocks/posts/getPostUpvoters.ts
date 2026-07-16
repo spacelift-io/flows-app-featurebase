@@ -48,10 +48,11 @@ export const getPostUpvotersBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
           postId: params.submissionId,
           upvoters: unwrapList(response),
-          pagination: normalizePagination(response),
+          ...(pagination && { pagination }),
           success: true,
         });
       },
@@ -158,7 +159,8 @@ export const getPostUpvotersBlock: AppBlock = {
           },
           pagination: {
             type: "object",
-            description: "Pagination information",
+            description:
+              "Pagination information. Only present when the API returns pagination metadata; individual fields are omitted when not provided.",
             properties: {
               page: { type: "number", description: "Current page number" },
               limit: { type: "number", description: "Items per page" },
@@ -171,14 +173,14 @@ export const getPostUpvotersBlock: AppBlock = {
                 description: "Total number of upvoters",
               },
             },
-            required: ["page", "limit", "totalPages", "totalResults"],
+            required: [],
           },
           success: {
             type: "boolean",
             description: "Whether the operation was successful",
           },
         },
-        required: ["postId", "upvoters", "pagination", "success"],
+        required: ["postId", "upvoters", "success"],
       },
     },
   },

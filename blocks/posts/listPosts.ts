@@ -91,9 +91,10 @@ export const listPostsBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
           posts: unwrapList(response),
-          pagination: normalizePagination(response),
+          ...(pagination && { pagination }),
           success: true,
         });
       },

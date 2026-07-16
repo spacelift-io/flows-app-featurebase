@@ -39,22 +39,33 @@ export function unwrapItem(response: any): any {
   return wrapped ?? response;
 }
 
+interface Pagination {
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  totalResults?: number;
+}
+
 /**
- * Normalizes pagination metadata into the `{ page, limit, totalPages,
+ * Extracts pagination metadata into the `{ page, limit, totalPages,
  * totalResults }` shape the output schemas declare. Reads from a nested Nova
- * `pagination` object when present, otherwise from the flat legacy fields, with
- * safe defaults.
+ * `pagination` object when present, otherwise from the flat legacy fields.
+ *
+ * Only fields that are actually present as numbers are included; if none are
+ * found this returns `undefined` so callers can omit the `pagination` key
+ * entirely rather than emit fabricated defaults.
  *
  * NOTE: the exact Nova pagination field names are unverified. If Nova uses
- * cursor-based paging these fields fall back to defaults; the item array
- * (unwrapList) is the part that is confirmed correct.
+ * cursor-based paging none of these match and `undefined` is returned; the item
+ * array (unwrapList) is the part that is confirmed correct.
  */
-export function normalizePagination(response: any) {
+export function normalizePagination(response: any): Pagination | undefined {
   const p = response?.pagination ?? response ?? {};
-  return {
-    page: p.page ?? 1,
-    limit: p.limit ?? 10,
-    totalPages: p.totalPages ?? 1,
-    totalResults: p.totalResults ?? p.total ?? 0,
-  };
+  const pagination: Pagination = {};
+  if (typeof p.page === "number") pagination.page = p.page;
+  if (typeof p.limit === "number") pagination.limit = p.limit;
+  if (typeof p.totalPages === "number") pagination.totalPages = p.totalPages;
+  const totalResults = p.totalResults ?? p.total;
+  if (typeof totalResults === "number") pagination.totalResults = totalResults;
+  return Object.keys(pagination).length > 0 ? pagination : undefined;
 }
