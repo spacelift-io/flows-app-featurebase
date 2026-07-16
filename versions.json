@@ -1,6 +1,11 @@
 {
   "versions": [
     {
+      "version": "0.3.2",
+      "artifactUrl": "https://github.com/spacelift-io/flows-app-featurebase/releases/download/v0.3.2/bundle.tar.gz",
+      "artifactChecksum": "sha256:c1fdf261fa0f6c7e4b0b59e2536983d21593c8cbceb3ac4458e9ad57e2ae10fe"
+    },
+    {
       "version": "0.3.1",
       "artifactUrl": "https://github.com/spacelift-io/flows-app-featurebase/releases/download/v0.3.1/bundle.tar.gz",
       "artifactChecksum": "sha256:eab8e4e11360c218858f80a87c8da475c322f33432ea4499999f57ed6d873afc"
