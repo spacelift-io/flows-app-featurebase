@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { getBoard } from "../../utils/apiHelpers.ts";
 import { buildGetBoardOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const getBoardBlock: AppBlock = {
   name: "Get board by ID",
@@ -30,7 +31,7 @@ export const getBoardBlock: AppBlock = {
           id,
         });
 
-        await events.emit(result);
+        await events.emit(unwrapItem(result));
       },
     },
   },

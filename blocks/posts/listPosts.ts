@@ -3,6 +3,10 @@ import { listPosts } from "../../utils/apiHelpers.ts";
 import { FeaturebaseListPostsParams } from "../../types.ts";
 import { buildListPostsOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import {
+  unwrapList,
+  normalizePagination,
+} from "../../utils/responseHelpers.ts";
 
 export const listPostsBlock: AppBlock = {
   name: "List Posts",
@@ -87,14 +91,10 @@ export const listPostsBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
-          posts: (response as any)?.results || [],
-          pagination: {
-            page: (response as any)?.page || 1,
-            limit: (response as any)?.limit || 10,
-            totalPages: (response as any)?.totalPages || 1,
-            totalResults: (response as any)?.totalResults || 0,
-          },
+          posts: unwrapList(response),
+          ...(pagination && { pagination }),
           success: true,
         });
       },

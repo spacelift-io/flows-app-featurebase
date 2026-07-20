@@ -3,6 +3,10 @@ import { listComments } from "../../utils/apiHelpers.ts";
 import { FeaturebaseListCommentsParams } from "../../types.ts";
 import { buildListCommentsOutput } from "../../schemas/common.ts";
 import { cleanParams, createApiConfig } from "../../utils/objectUtils.ts";
+import {
+  unwrapList,
+  normalizePagination,
+} from "../../utils/responseHelpers.ts";
 
 export const listCommentsBlock: AppBlock = {
   name: "List Comments",
@@ -91,14 +95,10 @@ export const listCommentsBlock: AppBlock = {
           params,
         );
 
+        const pagination = normalizePagination(response);
         await events.emit({
-          comments: (response as any)?.results || [],
-          pagination: {
-            page: (response as any)?.page || 1,
-            limit: (response as any)?.limit || 10,
-            totalPages: (response as any)?.totalPages || 1,
-            totalResults: (response as any)?.totalResults || 0,
-          },
+          comments: unwrapList(response),
+          ...(pagination && { pagination }),
           filters: {
             submissionId: params.submissionId,
             changelogId: params.changelogId,

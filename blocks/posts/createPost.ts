@@ -3,6 +3,7 @@ import { createPost } from "../../utils/apiHelpers.ts";
 import { FeaturebaseCreatePostParams } from "../../types.ts";
 import { buildCreatePostOutput } from "../../schemas/common.ts";
 import { cleanParams, createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const createPostBlock: AppBlock = {
   name: "Create Post",
@@ -102,9 +103,10 @@ export const createPostBlock: AppBlock = {
           params,
         );
 
+        // Nova returns the created post object directly.
         await events.emit({
-          post: (response as any)?.submission,
-          success: (response as any)?.success || true,
+          post: unwrapItem(response),
+          success: true,
         });
       },
     },

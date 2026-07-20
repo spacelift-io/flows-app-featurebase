@@ -3,6 +3,7 @@ import { createChangelog } from "../../utils/apiHelpers.ts";
 import { FeaturebaseCreateChangelogParams } from "../../types.ts";
 import { buildCreateChangelogOutput } from "../../schemas/common.ts";
 import { cleanParams, createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const createChangelogBlock: AppBlock = {
   name: "Create Changelog",
@@ -88,9 +89,10 @@ export const createChangelogBlock: AppBlock = {
           params,
         );
 
+        // Nova returns the created changelog object directly.
         await events.emit({
-          changelog: (response as any)?.results || (response as any)?.changelog,
-          success: (response as any)?.success || true,
+          changelog: unwrapItem(response),
+          success: true,
         });
       },
     },

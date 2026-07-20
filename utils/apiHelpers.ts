@@ -193,9 +193,37 @@ export async function createPost(
   config: FeaturebaseApiConfig,
   params: FeaturebaseCreatePostParams,
 ) {
+  // Nova API (2026): POST /v2/posts takes a JSON body. Several fields were
+  // renamed from the legacy API; map the legacy names so existing block configs
+  // keep working (same renames as updatePost). Form-encoding is also wrong here
+  // because `customFields` is an object.
+  const {
+    status,
+    category,
+    commentsAllowed,
+    date,
+    customInputValues,
+    email,
+    authorName,
+    ...rest
+  } = params;
+  const body: Record<string, any> = { ...rest };
+  if (status !== undefined) body.statusId = status;
+  if (category !== undefined) body.boardId = category;
+  if (commentsAllowed !== undefined) body.commentsEnabled = commentsAllowed;
+  if (date !== undefined) body.createdAt = date;
+  if (customInputValues !== undefined) body.customFields = customInputValues;
+  // Nova rejects unknown top-level keys; author attribution moved from
+  // top-level `email`/`authorName` into an `author` object.
+  if (email !== undefined || authorName !== undefined) {
+    body.author = {};
+    if (email !== undefined) body.author.email = email;
+    if (authorName !== undefined) body.author.name = authorName;
+  }
   return makeFeaturebaseRequest(config, "/v2/posts", {
     method: "POST",
-    body: params,
+    body,
+    contentType: "json",
   });
 }
 
@@ -269,9 +297,13 @@ export async function listComments(
   config: FeaturebaseApiConfig,
   params: FeaturebaseListCommentsParams = {},
 ) {
+  // Nova API (2026): the post filter is `postId` (legacy `submissionId`).
+  const { submissionId, ...rest } = params;
+  const queryParams: Record<string, any> = { ...rest };
+  if (submissionId !== undefined) queryParams.postId = submissionId;
   return makeFeaturebaseRequest(config, "/v2/comment", {
     method: "GET",
-    queryParams: params,
+    queryParams,
   });
 }
 
@@ -279,9 +311,16 @@ export async function createComment(
   config: FeaturebaseApiConfig,
   params: FeaturebaseCreateCommentParams,
 ) {
+  // Nova API (2026): POST /v2/comment with a JSON body. `submissionId` was
+  // renamed to `postId`; JSON is required so the `author` object serializes
+  // (form encoding turns it into "[object Object]").
+  const { submissionId, ...rest } = params;
+  const body: Record<string, any> = { ...rest };
+  if (submissionId !== undefined) body.postId = submissionId;
   return makeFeaturebaseRequest(config, "/v2/comment", {
     method: "POST",
-    body: params,
+    body,
+    contentType: "json",
   });
 }
 
@@ -289,20 +328,32 @@ export async function updateComment(
   config: FeaturebaseApiConfig,
   params: FeaturebaseUpdateCommentParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/comment", {
-    method: "PATCH",
-    body: params,
-  });
+  // Nova API (2026): update is PATCH /v2/comments/{id} (plural collection, path
+  // param); `id` in the body is rejected and `pinned` was renamed to `isPinned`.
+  const { id, pinned, ...rest } = params;
+  const body: Record<string, any> = { ...rest };
+  if (pinned !== undefined) body.isPinned = pinned;
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/comments/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body,
+      contentType: "json",
+    },
+  );
 }
 
 export async function deleteComment(
   config: FeaturebaseApiConfig,
   params: FeaturebaseDeleteCommentParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/comment", {
-    method: "DELETE",
-    body: params,
-  });
+  // Nova API (2026): delete is DELETE /v2/comments/{id} (plural, path param).
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/comments/${encodeURIComponent(params.id)}`,
+    { method: "DELETE" },
+  );
 }
 
 // Changelog API functions
@@ -320,19 +371,29 @@ export async function getChangelog(
   config: FeaturebaseApiConfig,
   params: { id: string },
 ) {
-  return makeFeaturebaseRequest(config, "/v2/changelog", {
-    method: "GET",
-    queryParams: { id: params.id },
-  });
+  // Nova API (2026): retrieve-by-id is GET /v2/changelogs/{id} (plural
+  // collection, path param). The legacy `GET /v2/changelog?id=` returns a list
+  // envelope, not a single changelog.
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/changelogs/${encodeURIComponent(params.id)}`,
+    { method: "GET" },
+  );
 }
 
 export async function createChangelog(
   config: FeaturebaseApiConfig,
   params: FeaturebaseCreateChangelogParams,
 ) {
+  // Nova API (2026): POST /v2/changelog with a JSON body; `changelogCategories`
+  // was renamed to `categories`.
+  const { changelogCategories, ...rest } = params;
+  const body: Record<string, any> = { ...rest };
+  if (changelogCategories !== undefined) body.categories = changelogCategories;
   return makeFeaturebaseRequest(config, "/v2/changelog", {
     method: "POST",
-    body: params,
+    body,
+    contentType: "json",
   });
 }
 
@@ -340,40 +401,69 @@ export async function updateChangelog(
   config: FeaturebaseApiConfig,
   params: FeaturebaseUpdateChangelogParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/changelog", {
-    method: "PATCH",
-    body: params,
-  });
+  // Nova API (2026): update is PATCH /v2/changelogs/{id} (plural, path param);
+  // `id` in the body is rejected and `changelogCategories` -> `categories`.
+  const { id, changelogCategories, ...rest } = params;
+  const body: Record<string, any> = { ...rest };
+  if (changelogCategories !== undefined) body.categories = changelogCategories;
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/changelogs/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body,
+      contentType: "json",
+    },
+  );
 }
 
 export async function deleteChangelog(
   config: FeaturebaseApiConfig,
   params: FeaturebaseDeleteChangelogParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/changelog", {
-    method: "DELETE",
-    body: params,
-  });
+  // Nova API (2026): delete is DELETE /v2/changelogs/{id} (plural, path param).
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/changelogs/${encodeURIComponent(params.id)}`,
+    { method: "DELETE" },
+  );
 }
 
 export async function publishChangelog(
   config: FeaturebaseApiConfig,
   params: FeaturebasePublishChangelogParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/changelog/publish", {
-    method: "POST",
-    body: params,
-  });
+  // Nova API (2026): publish is POST /v2/changelogs/{id}/publish (plural, path
+  // param); `id` in the body is rejected. Body field names (sendEmail/locales/
+  // scheduledDate) were not live-verified to avoid emailing subscribers.
+  const { id, ...body } = params;
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/changelogs/${encodeURIComponent(id)}/publish`,
+    {
+      method: "POST",
+      body,
+      contentType: "json",
+    },
+  );
 }
 
 export async function unpublishChangelog(
   config: FeaturebaseApiConfig,
   params: FeaturebaseUnpublishChangelogParams,
 ) {
-  return makeFeaturebaseRequest(config, "/v2/changelog/unpublish", {
-    method: "POST",
-    body: params,
-  });
+  // Nova API (2026): unpublish is POST /v2/changelogs/{id}/unpublish (plural,
+  // path param); `id` in the body is rejected.
+  const { id, ...body } = params;
+  return makeFeaturebaseRequest(
+    config,
+    `/v2/changelogs/${encodeURIComponent(id)}/unpublish`,
+    {
+      method: "POST",
+      body,
+      contentType: "json",
+    },
+  );
 }
 
 export async function getChangelogSubscribers(config: FeaturebaseApiConfig) {

@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { FeaturebaseApiError, getPost } from "../../utils/apiHelpers.ts";
 import { buildGetPostOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const getPostBlock: AppBlock = {
   name: "Get Post",
@@ -38,10 +39,7 @@ export const getPostBlock: AppBlock = {
 
         // Nova returns the Post object directly; the legacy API wrapped it
         // in `results` (array or single object). Support both.
-        const raw = response as any;
-        const post = Array.isArray(raw?.results)
-          ? raw.results[0]
-          : (raw?.results ?? raw);
+        const post = unwrapItem(response);
         const found = !!(post && post.id);
 
         await events.emit({

@@ -3,6 +3,7 @@ import { createComment } from "../../utils/apiHelpers.ts";
 import { FeaturebaseCreateCommentParams } from "../../types.ts";
 import { buildCreateCommentOutput } from "../../schemas/common.ts";
 import { cleanParams, createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapItem } from "../../utils/responseHelpers.ts";
 
 export const createCommentBlock: AppBlock = {
   name: "Create Comment",
@@ -110,8 +111,8 @@ export const createCommentBlock: AppBlock = {
         );
 
         await events.emit({
-          comment: (response as any)?.comment || response,
-          success: (response as any)?.success || true,
+          comment: unwrapItem(response),
+          success: true,
           submissionId: params.submissionId,
           changelogId: params.changelogId,
           parentCommentId: params.parentCommentId,

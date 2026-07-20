@@ -2,6 +2,7 @@ import { AppBlock, events } from "@slflows/sdk/v1";
 import { listSurveys } from "../../utils/apiHelpers.ts";
 import { buildListSurveysOutput } from "../../schemas/common.ts";
 import { createApiConfig } from "../../utils/objectUtils.ts";
+import { unwrapList } from "../../utils/responseHelpers.ts";
 
 export const listSurveysBlock: AppBlock = {
   name: "List surveys",
@@ -19,7 +20,10 @@ export const listSurveysBlock: AppBlock = {
 
         const result = await listSurveys(apiConfig);
 
-        await events.emit(result);
+        await events.emit({
+          success: true,
+          results: unwrapList(result),
+        });
       },
     },
   },
